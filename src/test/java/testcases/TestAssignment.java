@@ -38,10 +38,11 @@ public class TestAssignment extends DriverSetup {
         By DISCOUNTED_LIST = By.xpath("//span[@class='old-price']//ancestor::li");
         By PRICE = By.xpath("//span[@class='old-price']//ancestor::div[@class='wrap']/span");
 
+        // Hover over the category
         u.moveToElement(u.getElement(ELECTROINSTRUMENT));
         u.waitUntilVisibilityOfAllElements(CATEGORY_LIST, 10L);
         List<WebElement> categoryList = u.getElements(CATEGORY_LIST);
-
+        // Click on the desired category
         for (WebElement element : categoryList) {
             if (element.getAttribute("href").equals("https://kulibin.com.ua/catalog/dreli/")) {
                 u.waitUntilClickable(element, 10L);
@@ -49,26 +50,31 @@ public class TestAssignment extends DriverSetup {
                 break;
             }
         }
-
+        // Amount of products
         int numOfItems = 3;
 
         for (int i=0; i < store.getListOfItems(DISCOUNTED_LIST, numOfItems).size(); i++) {
 
             By INSIDE_PRICE_TAG = By.xpath("//div[@class='price-row']/span");
-
+            // Getting the old price tags and the new price tags for every prod.card
             List<WebElement> priceTags = store.getListOfItems(PRICE, numOfItems*2);
-            DataHolder.getInstance().put("old", store.priceToNumber(priceTags.get(i*2).getText()));
-            DataHolder.getInstance().put("new", store.priceToNumber(priceTags.get(1+(i*2)).getText()));
+            // Storing integer values of the price tags from the cards
+            int oldCardPrice = store.priceToNumber(priceTags.get(i*2).getText());
+            int newCardPrice = store.priceToNumber(priceTags.get(1+(i*2)).getText());
+            // Clicking on the next card
             WebElement card = store.getListOfItems(DISCOUNTED_LIST, numOfItems).get(i);
             u.scrollIntoView(card);
             card.click();
             List<WebElement> insidePriceTag = store.getListOfItems(INSIDE_PRICE_TAG);
-            int oldPrice = store.priceToNumber(insidePriceTag.get(0).getText());
-            int newPrice = store.priceToNumber(insidePriceTag.get(1).getText());
+            // Storing integer values of the price tags from the product page
+            int oldPagePrice = store.priceToNumber(insidePriceTag.get(0).getText());
+            int newPagePrice = store.priceToNumber(insidePriceTag.get(1).getText());
+            // Assertions:
             softAssert.assertTrue(insidePriceTag.get(0).isDisplayed() && insidePriceTag.get(1).isDisplayed());
-            softAssert.assertEquals(oldPrice, DataHolder.getInstance().get("old"));
-            softAssert.assertEquals(newPrice, DataHolder.getInstance().get("new"));
+            softAssert.assertEquals(oldPagePrice, oldCardPrice);
+            softAssert.assertEquals(newPagePrice, newCardPrice);
             softAssert.assertAll();
+
             driver.navigate().back();
 
         }
