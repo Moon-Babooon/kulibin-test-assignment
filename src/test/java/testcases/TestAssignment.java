@@ -26,6 +26,9 @@ public class TestAssignment extends DriverSetup {
     public StorePage store = new StorePage();
     public SoftAssert softAssert = new SoftAssert();
     By ELECTROINSTRUMENT = By.xpath("//a[@href='/catalog/elektroinstrument/']");
+    By DISCOUNTED_LIST = By.xpath("//span[@class='old-price']//ancestor::li");
+    By PRICE = By.xpath("//span[@class='old-price']//ancestor::div[@class='wrap']/span");
+    By INSIDE_PRICE_TAG = By.xpath("//div[@class='price-row']/span");
 
     @BeforeMethod
     public void precondition() {
@@ -35,16 +38,12 @@ public class TestAssignment extends DriverSetup {
 
     @Test
     public void priceTest() {
-        By DISCOUNTED_LIST = By.xpath("//span[@class='old-price']//ancestor::li");
-        By PRICE = By.xpath("//span[@class='old-price']//ancestor::div[@class='wrap']/span");
-
         // Hover over the category
         u.moveToElement(u.getElement(ELECTROINSTRUMENT));
         homePage.selectCategoryByName("Дрели");
         // Amount of items to verify
         int numOfItems = 3;
         for (int i=0; i < store.getListOfItems(DISCOUNTED_LIST, numOfItems).size(); i++) {
-            By INSIDE_PRICE_TAG = By.xpath("//div[@class='price-row']/span");
             // Getting the old price tags and the new price tags for every prod.card
             List<WebElement> priceTags = store.getListOfItems(PRICE, numOfItems*2);
             // Storing integer values of the price tags from the cards
@@ -98,7 +97,27 @@ public class TestAssignment extends DriverSetup {
     public void discountPriceTest() {
         u.moveToElement(u.getElement(ELECTROINSTRUMENT));
         homePage.selectCategoryByName("Шуруповерты");
+        for (int i=0; i < 3; i++) {
+            WebElement card = u.getElements(DISCOUNTED_LIST).get(i);
+            u.scrollIntoView(card);
+            card.click();
+            Document document = u.getHTML();
+            Elements tagList = document.selectXpath("//div[@class='price-row']");
+            Elements name = document.select("h1[itemprop='name']");
+            for (Element tag : tagList) {
+                String productName = name.text();
+                int oldPrice = store.priceToNumber(tag.select(".item_old_price").text());
+                int newPrice = store.priceToNumber(tag.select(".price").text());
+                double discountValue = u.calculateDiscount(oldPrice, newPrice);
 
+                System.out.println(discountValue);
+                System.out.println(productName);
+                System.out.println("Old price: "+oldPrice);
+                System.out.println("New price: "+newPrice);
+                driver.navigate().back();
+            }
+            store.gotoNextPage();
+        }
     }
 
 }

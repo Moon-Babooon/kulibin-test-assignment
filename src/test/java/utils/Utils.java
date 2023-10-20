@@ -77,4 +77,9 @@ public class Utils extends DriverSetup {
         throw new RuntimeException();
     }
 
+    public double calculateDiscount(int oldPrice, int newPrice) {
+        double tempPrice = oldPrice - newPrice;
+        return (tempPrice*100)/oldPrice;
+    }
+
 }
