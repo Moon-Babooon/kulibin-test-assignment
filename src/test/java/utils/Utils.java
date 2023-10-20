@@ -1,12 +1,13 @@
 package utils;
 
 import base.DriverSetup;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.asserts.SoftAssert;
-
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
@@ -23,10 +24,12 @@ public class Utils extends DriverSetup {
     }
 
     public WebElement getElement(By locator) {
+        waitUntilVisible(locator, 5L);
         return driver.findElement(locator);
     }
 
     public List<WebElement> getElements(By locator) {
+        waitUntilVisible(locator, 5L);
         return driver.findElements(locator);
     }
 
@@ -63,6 +66,15 @@ public class Utils extends DriverSetup {
     public void moveToElement(WebElement element) {
         Actions actions = new Actions(driver);
         actions.moveToElement(element).perform();
+    }
+
+    public Document getHTML() {
+        try {
+            return Jsoup.connect(driver.getCurrentUrl()).get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        throw new RuntimeException();
     }
 
 }
