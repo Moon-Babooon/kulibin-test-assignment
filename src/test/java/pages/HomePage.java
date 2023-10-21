@@ -33,7 +33,7 @@ public class HomePage extends DriverSetup {
     }
 
     public void selectCategoryByLink(String href) {
-        By CATEGORY_LIST = By.cssSelector("body > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > ul:nth-child(2) > li:nth-child(3) > div:nth-child(2) > div:nth-child(1) > ul > li > a");
+        By CATEGORY_LIST = By.cssSelector("ul.sub-nav>li .col>ul>li>a");
         u.waitUntilVisibilityOfAllElements(CATEGORY_LIST, 10L);
         List<WebElement> categoryList = u.getElements(CATEGORY_LIST);
         // Click on the desired category
