@@ -10,6 +10,7 @@ import java.util.List;
 public class HomePage extends DriverSetup {
 
     public Utils u = new Utils();
+    By CATEGORY_LIST = By.cssSelector("ul.sub-nav>li .col>ul>li>a");
 
     public void loadPage() {
         driver.get("about:blank");
@@ -28,12 +29,11 @@ public class HomePage extends DriverSetup {
                     langs.get(0).click();
             }
         } catch (TimeoutException e) {
-            e.getStackTrace();
+            e.printStackTrace();
         }
     }
 
     public void selectCategoryByLink(String href) {
-        By CATEGORY_LIST = By.cssSelector("ul.sub-nav>li .col>ul>li>a");
         u.waitUntilVisibilityOfAllElements(CATEGORY_LIST, 10L);
         List<WebElement> categoryList = u.getElements(CATEGORY_LIST);
         // Click on the desired category
@@ -47,7 +47,6 @@ public class HomePage extends DriverSetup {
     }
 
     public void selectCategoryByName(String name) {
-        By CATEGORY_LIST = By.cssSelector("body > div:nth-child(4) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > ul:nth-child(2) > li:nth-child(3) > div:nth-child(2) > div:nth-child(1) > ul > li > a");
         u.waitUntilVisibilityOfAllElements(CATEGORY_LIST, 10L);
         List<WebElement> categoryList = u.getElements(CATEGORY_LIST);
         // Click on the desired category
