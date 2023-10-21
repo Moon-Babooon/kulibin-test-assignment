@@ -1,7 +1,6 @@
 package testcases;
 
 import base.DriverSetup;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -14,9 +13,6 @@ import org.testng.asserts.SoftAssert;
 import pages.HomePage;
 import pages.StorePage;
 import utils.Utils;
-
-import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 public class TestAssignment extends DriverSetup {
@@ -24,7 +20,6 @@ public class TestAssignment extends DriverSetup {
     public Utils u = new Utils();
     public HomePage homePage = new HomePage();
     public StorePage store = new StorePage();
-    public SoftAssert softAssert = new SoftAssert();
     By ELECTROINSTRUMENT = By.xpath("//a[@href='/catalog/elektroinstrument/']");
     By DISCOUNTED_LIST = By.xpath("//span[@class='old-price']//ancestor::li");
     By PRICE = By.xpath("//span[@class='old-price']//ancestor::div[@class='wrap']/span");
@@ -33,11 +28,13 @@ public class TestAssignment extends DriverSetup {
     @BeforeMethod
     public void precondition() {
         homePage.loadPage();
+        driver.manage().window().maximize();
         homePage.chooseLanguage("ru");
     }
 
     @Test
     public void priceTest() {
+        SoftAssert softAssert = new SoftAssert();
         // Hover over the category
         u.moveToElement(u.getElement(ELECTROINSTRUMENT));
         homePage.selectCategoryByName("Дрели");
@@ -47,16 +44,16 @@ public class TestAssignment extends DriverSetup {
             // Getting the old price tags and the new price tags for every prod.card
             List<WebElement> priceTags = store.getListOfItems(PRICE, numOfItems*2);
             // Storing integer values of the price tags from the cards
-            int cardPriceOld = store.priceToNumber(priceTags.get(i*2).getText());
-            int cardPriceNew = store.priceToNumber(priceTags.get(1+(i*2)).getText());
+            int cardPriceOld = u.priceToNumber(priceTags.get(i*2).getText());
+            int cardPriceNew = u.priceToNumber(priceTags.get(1+(i*2)).getText());
             // Clicking on the next card
             WebElement card = store.getListOfItems(DISCOUNTED_LIST, numOfItems).get(i);
             u.scrollIntoView(card);
             card.click();
             List<WebElement> insidePriceTag = store.getListOfItems(INSIDE_PRICE_TAG);
             // Storing integer values of the price tags from the product page
-            int pagePriceOld = store.priceToNumber(insidePriceTag.get(0).getText());
-            int pagePriceNew = store.priceToNumber(insidePriceTag.get(1).getText());
+            int pagePriceOld = u.priceToNumber(insidePriceTag.get(0).getText());
+            int pagePriceNew = u.priceToNumber(insidePriceTag.get(1).getText());
             // Assertions:
             softAssert.assertTrue(insidePriceTag.get(0).isDisplayed() && insidePriceTag.get(1).isDisplayed());
             softAssert.assertEquals(pagePriceOld, cardPriceOld);
@@ -68,11 +65,13 @@ public class TestAssignment extends DriverSetup {
 
     @Test
     public void discountLabelTest() {
+        SoftAssert softAssert = new SoftAssert();
         u.moveToElement(u.getElement(ELECTROINSTRUMENT));
         homePage.selectCategoryByName("Перфораторы");
         Document document = u.getHTML();
         Elements discountList = document.select(".js-product").select(".old-price");
         softAssert.assertTrue(!discountList.isEmpty());
+        softAssert.assertAll();
     }
 
     @Test
@@ -95,29 +94,29 @@ public class TestAssignment extends DriverSetup {
 
     @Test
     public void discountPriceTest() {
+        SoftAssert softAssert = new SoftAssert();
         u.moveToElement(u.getElement(ELECTROINSTRUMENT));
         homePage.selectCategoryByName("Шуруповерты");
-        for (int i=0; i < 3; i++) {
-            WebElement card = u.getElements(DISCOUNTED_LIST).get(i);
+        for (int i=0; i < 10; i++) {
+            List<WebElement> discountedList = u.getElements(DISCOUNTED_LIST);
+            WebElement card = discountedList.get(u.randomInt(1, discountedList.size()-1));
             u.scrollIntoView(card);
             card.click();
             Document document = u.getHTML();
-            Elements tagList = document.selectXpath("//div[@class='price-row']");
+            Elements priceTag = document.selectXpath("//div[@class='price-row']");
             Elements name = document.select("h1[itemprop='name']");
-            for (Element tag : tagList) {
+            for (Element tag : priceTag) {
                 String productName = name.text();
-                int oldPrice = store.priceToNumber(tag.select(".item_old_price").text());
-                int newPrice = store.priceToNumber(tag.select(".price").text());
-                double discountValue = u.calculateDiscount(oldPrice, newPrice);
-
-                System.out.println(discountValue);
-                System.out.println(productName);
-                System.out.println("Old price: "+oldPrice);
-                System.out.println("New price: "+newPrice);
+                int oldPrice = u.priceToNumber(tag.select(".item_old_price").text());
+                int newPrice = u.priceToNumber(tag.select(".price").text());
+                double discount = u.calculateDiscount(oldPrice, newPrice);
+                int expectedPrice = u.calculatePrice(oldPrice, discount);
+                softAssert.assertEquals(newPrice, expectedPrice, "Item "+productName+ " has incorrect price.");
                 driver.navigate().back();
             }
             store.gotoNextPage();
         }
+        softAssert.assertAll();
     }
 
 }

@@ -19,20 +19,16 @@ public class StorePage extends DriverSetup {
         return driver.findElements(locator);
     }
 
-
-
-    public int priceToNumber(String price) {
-        String cleanPrice = price.replace(" грн.", "").replace(" ", "");
-        if (cleanPrice.contains(",00")) {
-            String finalPrice = cleanPrice.replace(",00", "");
-            return Integer.parseInt(finalPrice);
-        } else {
-            return Integer.parseInt(cleanPrice);
-        }
-    }
-
     public void gotoNextPage() {
         By NEXT_PAGE_BTN = By.cssSelector(".paging .btn-blue:last-child");
         u.getElement(NEXT_PAGE_BTN).click();
     }
+
+    public void gotoPrevPage() {
+        By PREV_PAGE_BTN = By.cssSelector(".paging .btn-blue:first-child");
+        u.getElement(PREV_PAGE_BTN).click();
+    }
+
+
+
 }

@@ -77,9 +77,28 @@ public class Utils extends DriverSetup {
         throw new RuntimeException();
     }
 
+    public int priceToNumber(String price) {
+        String cleanPrice = price.replace(" грн.", "").replace(" ", "");
+        if (cleanPrice.contains(",00")) {
+            String finalPrice = cleanPrice.replace(",00", "");
+            return Integer.parseInt(finalPrice);
+        } else {
+            return Integer.parseInt(cleanPrice);
+        }
+    }
+
     public double calculateDiscount(int oldPrice, int newPrice) {
-        double tempPrice = oldPrice - newPrice;
-        return (tempPrice*100)/oldPrice;
+        double difference = oldPrice - newPrice;
+        return (((difference*100)/oldPrice)/100)+0.01;
+    }
+
+    public int randomInt(int min, int max) {
+        return (int) Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    public int calculatePrice(int oldPrice, double discount) {
+        double discountedPrice = oldPrice*discount;
+        return (int) (oldPrice-discountedPrice);
     }
 
 }
